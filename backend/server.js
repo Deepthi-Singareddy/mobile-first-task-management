@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
+const { connectDB, getDbDiagnostics } = require('./config/db');
 const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
 // Load environment variables
@@ -47,28 +47,28 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  const mongoose = require('mongoose');
-  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
-  const dbStatus = states[mongoose.connection.readyState] || 'unknown';
-
+  const diag = getDbDiagnostics();
   res.status(200).json({
     status: 'ok',
     uptime: process.uptime(),
-    database: dbStatus,
-    databaseHost: mongoose.connection.host || null,
+    database: diag.status,
+    databaseHost: diag.host,
+    envConfigured: diag.envConfigured,
+    detectedVarName: diag.detectedVarName,
+    protocol: diag.protocol,
+    lastError: diag.lastError,
     timestamp: new Date().toISOString(),
   });
 });
 
 app.get('/api/health', (req, res) => {
-  const mongoose = require('mongoose');
-  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
-  const dbStatus = states[mongoose.connection.readyState] || 'unknown';
-
+  const diag = getDbDiagnostics();
   res.status(200).json({
     status: 'ok',
     message: 'Task Management API is running',
-    database: dbStatus,
+    database: diag.status,
+    envConfigured: diag.envConfigured,
+    lastError: diag.lastError,
     timestamp: new Date().toISOString(),
   });
 });
