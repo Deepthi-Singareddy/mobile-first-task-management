@@ -1,19 +1,33 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
-  if (!process.env.MONGO_URI) {
-    console.error('MONGO_URI is not defined in environment variables.');
+  const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+
+  if (!mongoUri) {
+    console.error('Neither MONGO_URI nor MONGODB_URI is defined in environment variables.');
     return;
   }
 
+  // Mongoose connection event listeners
+  mongoose.connection.on('connected', () => {
+    console.log(`MongoDB Connected successfully to host: ${mongoose.connection.host}`);
+  });
+
+  mongoose.connection.on('error', (err) => {
+    console.error(`MongoDB connection error: ${err.message}`);
+  });
+
+  mongoose.connection.on('disconnected', () => {
+    console.warn('MongoDB disconnected.');
+  });
+
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
+    const conn = await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 10000,
     });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`MongoDB initial connection established to: ${conn.connection.host}`);
   } catch (error) {
-    console.error(`MongoDB connection error: ${error.message}`);
-    console.error('Server will continue running. Check MongoDB Atlas network access (0.0.0.0/0 whitelist) and credentials.');
+    console.error(`MongoDB connection failed: ${error.message}`);
   }
 };
 
