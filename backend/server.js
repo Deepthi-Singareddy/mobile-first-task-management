@@ -47,17 +47,28 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  const dbStatus = states[mongoose.connection.readyState] || 'unknown';
+
   res.status(200).json({
     status: 'ok',
     uptime: process.uptime(),
+    database: dbStatus,
+    databaseHost: mongoose.connection.host || null,
     timestamp: new Date().toISOString(),
   });
 });
 
 app.get('/api/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  const dbStatus = states[mongoose.connection.readyState] || 'unknown';
+
   res.status(200).json({
     status: 'ok',
     message: 'Task Management API is running',
+    database: dbStatus,
     timestamp: new Date().toISOString(),
   });
 });
