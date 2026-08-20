@@ -143,8 +143,8 @@ task-management-mern/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/task-management-mern.git
-cd task-management-mern
+git clone https://github.com/Deepthi-Singareddy/mobile-first-task-management.git
+cd mobile-first-task-management
 ```
 
 ### 2. Backend Setup
