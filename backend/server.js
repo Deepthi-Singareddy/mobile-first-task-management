@@ -7,14 +7,26 @@ const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman, Render health checks)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    // Fallback allow during cross-origin transition
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -24,9 +36,30 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health check route
+// Public health check routes
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Mobile-First Task Management API is running',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Task Management API is running' });
+  res.status(200).json({
+    status: 'ok',
+    message: 'Task Management API is running',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // API Routes
@@ -37,9 +70,13 @@ app.use('/api/tasks', require('./routes/taskRoutes'));
 app.use(notFound);
 app.use(errorHandler);
 
-// Start server
+// Start server on 0.0.0.0
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT} bound to 0.0.0.0`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  // Connect to database after server has started listening
+  connectDB();
 });
+
+module.exports = app;
