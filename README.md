@@ -331,6 +331,12 @@ The app will open at `http://localhost:5173`.
 
 ---
 
+## 🌐 Live Demo
+
+- **Frontend:** https://mobile-first-task-management.vercel.app
+- **Backend API:** https://mobile-first-task-management-api.onrender.com
+- **Health Check:** https://mobile-first-task-management-api.onrender.com/health
+  
 ## ⚖️ Trade-offs & Future Improvements
 
 ### Architecture Trade-offs Made
@@ -350,4 +356,4 @@ The app will open at `http://localhost:5173`.
 
 ## 📄 License
 
-This project was created as part of the Mobile First Applications Trainee Assessment.
+This project was created as part of the Mobile First Applications Trainee Assignment.
